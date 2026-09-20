@@ -41,11 +41,11 @@ class DefaultFirebaseOptions {
   // Then run `flutterfire configure` for automatic generation
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'YOUR_ANDROID_API_KEY',            // ← Replace
-    appId: 'YOUR_ANDROID_APP_ID',              // ← Replace
-    messagingSenderId: 'YOUR_SENDER_ID',       // ← Replace
-    projectId: 'YOUR_PROJECT_ID',             // ← Replace
-    storageBucket: 'YOUR_PROJECT_ID.appspot.com', // ← Replace
+    apiKey: 'AIzaSyBSyy8cIsYdMPjT-AdqxYtwAN7Qx97A_T0',
+    appId: '1:721351757303:android:b74259be3f1ba98579b2f2',
+    messagingSenderId: '721351757303',
+    projectId: 'streamhub-yt-app',
+    storageBucket: 'streamhub-yt-app.firebasestorage.app',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(

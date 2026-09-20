@@ -15,7 +15,7 @@ class AdminLoginScreen extends StatefulWidget {
 
 class _AdminLoginScreenState extends State<AdminLoginScreen> {
   final _formKey = GlobalKey<FormState>();
-  final _emailController = TextEditingController();
+  final _emailController = TextEditingController(text: 'rajmishr150@gmail.com');
   final _passwordController = TextEditingController();
   bool _isLoading = false;
   bool _obscurePassword = true;
