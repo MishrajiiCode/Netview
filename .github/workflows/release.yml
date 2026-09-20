@@ -1,0 +1,89 @@
+name: Build & Release APK / App Bundle
+
+on:
+  push:
+    branches: [ main, master ]
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      release_title:
+        description: 'Release Title'
+        required: false
+        default: 'Movi App Release'
+      release_tag:
+        description: 'Release Tag (e.g. v1.0.0)'
+        required: false
+        default: 'v1.0.0'
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: Build APK and AAB
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.24.5'
+          channel: 'stable'
+          cache: true
+
+      - name: Install Dependencies
+        run: flutter pub get
+
+      - name: Patch plugin gradle compileSdkVersion if needed
+        run: |
+          find ~/.pub-cache -name "build.gradle" -exec sed -i 's/compileSdk = flutter.compileSdkVersion/compileSdk = 36/g' {} + || true
+
+      - name: Build Android APK
+        run: flutter build apk --release --no-tree-shake-icons
+
+      - name: Build Android App Bundle (AAB)
+        run: flutter build appbundle --release --no-tree-shake-icons
+
+      - name: Rename APK & AAB for clarity
+        run: |
+          cp build/app/outputs/flutter-apk/app-release.apk build/app/outputs/flutter-apk/movi-app-release.apk
+          cp build/app/outputs/bundle/release/app-release.aab build/app/outputs/bundle/release/movi-app-release.aab
+
+      - name: Upload APK Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: movi-apk
+          path: build/app/outputs/flutter-apk/movi-app-release.apk
+          retention-days: 30
+
+      - name: Upload App Bundle Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: movi-bundle
+          path: build/app/outputs/bundle/release/movi-app-release.aab
+          retention-days: 30
+
+      - name: Create Release and Upload APK/AAB
+        if: startsWith(github.ref, 'refs/tags/v') || github.event_name == 'workflow_dispatch'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name || inputs.release_tag }}
+          name: ${{ inputs.release_title || github.ref_name }}
+          draft: false
+          prerelease: false
+          generate_release_notes: true
+          files: |
+            build/app/outputs/flutter-apk/movi-app-release.apk
+            build/app/outputs/bundle/release/movi-app-release.aab
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
